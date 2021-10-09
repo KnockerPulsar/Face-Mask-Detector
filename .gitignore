@@ -1,0 +1,7 @@
+
+*.pyc
+data/**
+checkpoints/SZ200_EP10_LR1e-05_BS128_BA97.87.ckpt
+checkpoints/SZ300_EP10_LR1e-05_BS64_BA93%.ckpt
+checkpoints/09-10-2021 17:19:40 - SZ100_EP10_LR1e-05_BS64_BA92.32%.ckpt
+checkpoints/09-10-2021 18:02:01 - SZ100_EP10_LR1e-05_BS64_BA96.36%.ckpt
