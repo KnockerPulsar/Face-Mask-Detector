@@ -13,7 +13,6 @@ Another thing is that the face detector model I'm using (res10_300x300_ssd_iter_
 *   Webcam classification
 *   Image classification
 *   Training
-
 #   TODO
 * Video classification
 * Projectt cleanup

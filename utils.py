@@ -10,8 +10,11 @@ labels = ['Mask', 'No mask']
 labelColor = [(10, 255, 0), (10, 0, 255)]
 font = cv2.FONT_HERSHEY_SIMPLEX
 
-def detect_frame(frame, face_detection_model, face_classifier_model, device, val_trns):
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+def detect_frame(frame, face_detection_model, face_classifier_model, device, val_trns, opencv_frame = True):
+
+    if opencv_frame == True:
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        
     faces = face_detection_model.detect(frame)
 
     for face in faces:
@@ -42,10 +45,12 @@ def detect_frame(frame, face_detection_model, face_classifier_model, device, val
                     (x_start, y_start-20),
                     font, 0.5, labelColor[predicted], 1)
 
-    frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+    if opencv_frame == True:
+        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
     return frame
 
-def load_mask_classifier(checkpoint, device):
+
+def load_mask_classifier(checkpoint, device, eval=True):
     checkpoint = t.load(checkpoint, map_location=device)
 
     lazy = False
@@ -56,7 +61,6 @@ def load_mask_classifier(checkpoint, device):
 
     if 'img_size' in checkpoint.keys():
         img_size = checkpoint['img_size']
-
 
     val_trns = Compose([
         ToPILImage(),
@@ -70,7 +74,11 @@ def load_mask_classifier(checkpoint, device):
     else:
         model.load_state_dict(checkpoint, strict=False)
 
-    model.eval()
+    if eval == True:
+        model.eval()
+
     model.to(device)
+
+    print(f"Loaded model with with image size: {img_size}")
 
     return model, val_trns
