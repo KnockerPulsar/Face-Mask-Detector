@@ -4,7 +4,6 @@ import cv2
 import numpy as np
 from torch import long, tensor
 from torch.utils.data.dataset import Dataset
-from torchvision.transforms import Compose, Resize, ToPILImage, ToTensor, Grayscale
 
 
 class MaskDataset(Dataset):
@@ -14,15 +13,6 @@ class MaskDataset(Dataset):
     """
     def __init__(self, dataFrame, transformations):
         self.dataFrame = dataFrame
-        
-        # self.transformations = Compose([
-        #     ToPILImage(),
-        #     Resize((100, 100)),
-        #     Grayscale(num_output_channels=3),
-
-        #     ToTensor(), # [0, 1]
-        # ])
-
         self.transformations = transformations
     
     def __getitem__(self, key):

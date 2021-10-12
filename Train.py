@@ -1,31 +1,14 @@
-from datetime import datetime
-import torch as t
-from torch._C import device
-from torch.nn.modules import lazy
-from torch.utils.data import Dataset, DataLoader
-
-import torchvision as tv
-from torchvision import utils, datasets
-from torchvision.transforms import *
-
-import imutils
-from imutils.video import VideoStream
-
-import matplotlib.pyplot as plt
-from PIL import Image
-import numpy as np
 import copy
 import time
-import os
-
-import cv2
-from torch.nn import *
-from pathlib import Path
-from MaskDetector import MaskDetector
-from dataset import MaskDataset
-from tqdm import tqdm
 import argparse
-from FaceDetector import FaceDetector
+import torch as t
+
+from MaskDetector import MaskDetector
+from torchvision.transforms import *
+from datetime import datetime
+from pathlib import Path
+from torch.nn import *
+from tqdm import tqdm
 
 DEFAULT_DATA_PATH = "./data/mask_df.csv"
 DEFAULT_IMG_SIZE = 100

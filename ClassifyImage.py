@@ -1,33 +1,14 @@
-from datetime import datetime
-from genericpath import exists
 import torch as t
-from torch._C import device
-from torch.nn.modules import lazy
-from torch.utils.data import Dataset, DataLoader
-
-import torchvision as tv
-from torchvision import utils, datasets
-from torchvision.transforms import *
-
-import imutils
-from imutils.video import VideoStream
-
-import matplotlib.pyplot as plt
-from PIL import Image
-import numpy as np
-import copy
-import time
+import argparse
+import cv2
 import os
 
-import cv2
-from torch.nn import *
-from pathlib import Path
-from MaskDetector import MaskDetector
-from dataset import MaskDataset
-from tqdm import tqdm
-import argparse
-from FaceDetector import FaceDetector
 from utils import detect_frame, load_mask_classifier
+from FaceDetector import FaceDetector
+from torchvision.transforms import *
+from torch._C import device
+from pathlib import Path
+from torch.nn import *
 
 arg = argparse.ArgumentParser()
 arg.add_argument("img_path", type=str,
@@ -44,26 +25,30 @@ arg = arg.parse_args()
 
 if __name__ == "__main__":
     img_path = Path(arg.img_path)
-    out_path = Path(arg.output_dir)
 
     if not img_path.exists():
         print("The given image path is not valid, exiting...")
-    elif arg.output_dir is not None and (not out_path.exists() or not out_path.is_dir()):
+    elif arg.output_dir is not None and (not Path(arg.output_dir).exists() or not Path(arg.output_dir).is_dir()):
         print("The image output path is not valid, exiting...")
     else:
         img = cv2.imread(arg.img_path)
         print(f"Loaded image at {arg.img_path}")
 
-        device = t.device("cuda:0" if t.cuda.is_available() else "cpu")
+        device = None
+        if t.cuda.is_available():
+            print("GPU available, using it...")
+            device = t.device("cuda:0")
+        else:
+            print("GPU not available, using CPU...")
+            device = t.device("cpu")
 
         model, val_trns = load_mask_classifier(arg.checkpoint, device)
 
         face_detector = FaceDetector(prototype='./checkpoints/deploy.prototxt.txt',
                                      model='./checkpoints/res10_300x300_ssd_iter_140000.caffemodel')
 
-        print("Face detector and mask classifier loaded successfully, passing image to mode...")
+        print("Face detector and mask classifier loaded successfully, passing image to model...")
         img = detect_frame(img, face_detector, model, device, val_trns)
-
 
         if arg.output_dir is not None:
             split = list(os.path.split(arg.output_dir))
@@ -78,4 +63,3 @@ if __name__ == "__main__":
             cv2.imshow("Result", img)
             cv2.waitKey(0)
             cv2.destroyAllWindows()
-

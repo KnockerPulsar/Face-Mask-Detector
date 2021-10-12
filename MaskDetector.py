@@ -1,44 +1,21 @@
-from pathlib import Path
-from typing import Dict, List
-from cv2 import dilate
-
-import pandas as pd
-import pytorch_lightning as pl
-from pytorch_lightning.metrics.classification.accuracy import Accuracy
 import torch
 import torch.nn.init as init
-from pytorch_lightning import Trainer
-from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning.loggers import TensorBoardLogger
+import pandas as pd
+import pytorch_lightning as pl
+
+from torch.nn import (Conv2d, CrossEntropyLoss, Linear,MaxPool2d, ReLU, Sequential)
+from torchvision.transforms.transforms import ToPILImage, ToTensor, Compose
+from pytorch_lightning.metrics.classification.accuracy import Accuracy
+from torchmetrics.classification.accuracy import Accuracy
 from sklearn.model_selection import train_test_split
-from torch import Tensor
-from torch.nn import (Conv2d, CrossEntropyLoss, Linear, MaxPool2d, ReLU,
-                      Sequential)
-from torch.nn.modules.flatten import Flatten
 from torch.nn.modules.linear import LazyLinear
-from torch.optim import Adam
+from torch.nn.modules.flatten import Flatten
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
-from torchvision.transforms.transforms import ToPILImage, ToTensor, Compose
-
-from torchmetrics.classification.accuracy import Accuracy
-
 from dataset import MaskDataset
-
-
-def get_h(conv: Conv2d, img_height):
-    nom = img_height + 2 * conv.padding[1] - \
-        conv.dilation[0]*(conv.kernel_size[0]-1)-1
-    denom = conv.stride[0]
-    return int(nom/denom) + 1
-
-
-def get_w(conv: Conv2d, img_width):
-    nom = img_width + 2*conv.padding[1] - \
-        conv.dilation[1]*(conv.kernel_size[1]-1)-1
-    denom = conv.stride[1]
-    return int(nom/denom)+1
-
+from torch.optim import Adam
+from pathlib import Path
+from torch import Tensor
 
 class MaskDetector(pl.LightningModule):
     """ MaskDetector PyTorch Lightning class
@@ -155,36 +132,3 @@ class MaskDetector(pl.LightningModule):
 
     def configure_optimizers(self) -> Optimizer:
         return Adam(self.parameters(), lr=self.learningRate)
-
-    # pylint: disable=arguments-differ
-    def training_step(self, batch: dict, _batch_idx: int) -> Tensor:
-        inputs, labels = batch['image'], batch['mask']
-        labels = labels.flatten()
-        outputs = self.forward(inputs)
-        loss = self.crossEntropyLoss(outputs, labels)
-        self.trainAcc(outputs.argmax(dim=1), labels)
-        self.log('train_loss', loss, on_step=False,
-                 on_epoch=True, prog_bar=False)
-        return loss
-
-    def training_epoch_end(self, _trainingStepOutputs):
-        self.log('train_acc', self.trainAcc.compute() * 100, prog_bar=True)
-        self.trainAcc.reset()
-
-    def validation_step(self, batch: dict, _batch_idx: int) -> Dict[str, Tensor]:
-        inputs, labels = batch['image'], batch['mask']
-        labels = labels.flatten()
-        outputs = self.forward(inputs)
-        loss = self.crossEntropyLoss(outputs, labels)
-
-        self.valAcc(outputs.argmax(dim=1), labels)
-
-        return {'val_loss': loss}
-
-    def validation_epoch_end(self, validationStepOutputs: List[Dict[str, Tensor]]):
-        avgLoss = torch.stack([x['val_loss']
-                              for x in validationStepOutputs]).mean()
-        valAcc = self.valAcc.compute() * 100
-        self.valAcc.reset()
-        self.log('val_loss', avgLoss, prog_bar=True)
-        self.log('val_acc', valAcc, prog_bar=True)

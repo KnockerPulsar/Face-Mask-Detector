@@ -1,36 +1,15 @@
-from datetime import datetime
-from genericpath import exists
-from skvideo.io.io import vread
-import torch as t
-from torch._C import device
-from torch.nn.modules import lazy
-from torch.utils.data import Dataset, DataLoader
-
-import torchvision as tv
-from torchvision import utils, datasets
-from torchvision.transforms import *
-
-import imutils
-from imutils.video import VideoStream
-
-import matplotlib.pyplot as plt
-from PIL import Image
-import numpy as np
-import copy
-import time
 import os
-
 import cv2
-from torch.nn import *
-from pathlib import Path
-from MaskDetector import MaskDetector
-from dataset import MaskDataset
-from tqdm import tqdm
 import argparse
-from FaceDetector import FaceDetector
-from utils import detect_frame, load_mask_classifier
+import torch as t
 
+from utils import detect_frame, load_mask_classifier
 from skvideo.io import FFmpegWriter, vreader, ffprobe
+from FaceDetector import FaceDetector
+from torchvision.transforms import *
+from pathlib import Path
+from torch.nn import *
+from tqdm import tqdm
 
 arg = argparse.ArgumentParser()
 arg.add_argument("vid_path", type=str,

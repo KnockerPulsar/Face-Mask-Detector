@@ -1,18 +1,11 @@
-import torch as t
-
-from torchvision.transforms import *
-
-from imutils.video import VideoStream
-
 import cv2
-from MaskDetector import MaskDetector
 import argparse
-from FaceDetector import FaceDetector
+import torch as t
+from torch._C import device
 
 from utils import detect_frame, load_mask_classifier
-
-import traceback
-
+from FaceDetector import FaceDetector
+from torchvision.transforms import *
 
 arg = argparse.ArgumentParser()
 arg.add_argument("--checkpoint", type=str,
@@ -20,14 +13,17 @@ arg.add_argument("--checkpoint", type=str,
                  default="./checkpoints/face_mask.ckpt")
 arg.add_argument("--viewer-res", type=int,
                  help="The output viewer resolutions", default=600)
-arg.add_argument("--use-gpu", type=bool, default=True,
-                 help="Whether or not to use the GPU. Depends on CUDA, so might not work if there are problems with it")
 arg = arg.parse_args()
 
 if __name__ == "__main__":
 
-
-    device = t.device("cuda:0" if t.cuda.is_available() else "cpu")
+    device = None
+    if t.cuda.is_available():
+        print("GPU available, using it...")
+        device=t.device("cuda:0")
+    else:
+        print("GPU not available, using CPU...")
+        device=t.device("cpu")
 
     model, val_trns = load_mask_classifier(arg.checkpoint, device)
 
@@ -36,20 +32,19 @@ if __name__ == "__main__":
 
     print("Successfully loaded model, initializing webcam...")
     print("Press q to quit")
-    vs = VideoStream(src=0).start()
+    vs = cv2.VideoCapture(0)
+    cv2.namedWindow("Results", cv2.WINDOW_NORMAL)
 
     while True:
 
-        frame = vs.read()
-        frame = detect_frame(frame, face_detector, model, device,val_trns)
+        ret, frame = vs.read()
+        frame = detect_frame(frame, face_detector, model, device, val_trns)
 
-        frame = cv2.resize(frame, (arg.viewer_res,arg.viewer_res))
-        cv2.imshow("frame", frame)
+        cv2.imshow("Results", frame)
 
-        key = cv2.waitKey(1) & 0xFF
-        if key == ord("q"):
+        if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
     print("Exiting")
-    vs.stop()
-    cv2.destroyAllWindows()
+    vs.release()
+    cv2.destroyWindow("Results")
