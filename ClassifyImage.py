@@ -16,7 +16,7 @@ arg.add_argument("img_path", type=str,
 arg.add_argument("--checkpoint", type=str, default="./checkpoints/face_mask.ckpt",
                  help="The path to the model checkpoint you want to classify with")
 arg.add_argument("--show-result", type=bool, default=True,
-                 help="Whether to show the classified image or not. Best used with --output-path")
+                 help="Whether to show the classified image or not. Best used with --output-dir")
 arg.add_argument("--output-dir", type=str,
                  help="Where to output the classified image. Will not output if a directory is not given")
 

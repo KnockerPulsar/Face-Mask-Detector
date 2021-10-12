@@ -6,21 +6,39 @@ import cv2
 from MaskDetector import MaskDetector
 
 
+def clamp_val(val, min_val, max_val):
+    return max(min_val, min(max_val, val))
+
+
 labels = ['Mask', 'No mask']
 labelColor = [(10, 255, 0), (10, 0, 255)]
 font = cv2.FONT_HERSHEY_SIMPLEX
 
-def detect_frame(frame, face_detection_model, face_classifier_model, device, val_trns, opencv_frame = True):
+
+def detect_frame(frame, face_detection_model, face_classifier_model, device, val_trns, opencv_frame=True):
 
     if opencv_frame == True:
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        
+
     faces = face_detection_model.detect(frame)
 
     for face in faces:
         x_start, y_start, x_end, y_end = face
 
-        x_start, y_start = max(x_start, 0), max(y_start, 0)
+        x_start = clamp_val(x_start, 0, frame.shape[1]-1)
+        x_end = clamp_val(x_end, 0, frame.shape[1]-1)
+
+        y_start = clamp_val(y_start, 0, frame.shape[0]-1)
+        y_end = clamp_val(y_end, 0, frame.shape[0]-1)
+
+        if x_start==x_end or y_start == y_end:
+            print("Moving too fast!")
+            continue
+
+
+        # print(x_start, y_start,x_end,y_end)
+        # print(face)
+        # print(frame.shape)
 
         faceImg = frame[y_start:y_end, x_start:x_end]
 
