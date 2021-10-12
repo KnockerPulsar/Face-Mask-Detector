@@ -1,7 +1,7 @@
 # Face Mask Detector
 A face mask detector made in Pytorch (lightning?). Primarily made for The Sparks Foundation's Computer vision and IoT internship.
 I could've copied the code from the TensorFlow tutorial, but I figured out it'd be a good chance to learn more about pytorch and challenge myself.
-Based on [Jad Haddad's]() Face mask detector (dataset, data preparation and model architecture)
+Based on [Jad Haddad's](https://github.com/JadHADDAD92/covid-mask-detector) Face mask detector (dataset, data preparation and model architecture)
 
 # Pitfalls
 * **Face detection**: You can't really classify faces if you don't detect any. This is one failure point that's available to tinker with to hopefully achieve better results. 
